@@ -9,6 +9,13 @@ router.get('/donors', function(req, res, next) {
 	});
 });
 
+//GET Donor By Name
+router.get('/donors/by-name/:name', function(req, res, next) {
+    Donor.findOne({name:req.params.name}, function (err, results) {
+	    res.json(results);
+	});
+});
+
 //Save a Donor
 router.post('/donors', function(req, res, next) {
 	var donor = new Donor(req.body);
@@ -19,7 +26,7 @@ router.post('/donors', function(req, res, next) {
 
 //Update a Donor
 router.put('/donors/:id', function(req, res, next) {
-	Donor.findByIdAndUpdate(req.params.id, { $set: req.body }, function (err, donor) {
+	Donor.findByIdAndUpdate(req.params.id, { $set: req.body }, {new: true}, function (err, donor) {
 	  if(err) console.log(err);
 	  res.json(donor);
 	});
@@ -28,7 +35,7 @@ router.put('/donors/:id', function(req, res, next) {
 //Delete a Donor
 router.delete('/donors/:id', function(req, res) {
 	Donor.findOneAndRemove({'_id' : req.params.id}, function(err){
-		res.json("OK");
+		res.json({"status":"OK"});
 	});
 });
 

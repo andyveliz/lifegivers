@@ -4,7 +4,8 @@ module.exports = mongoose.model('Donor', {
   name: String,
   phone: String,
   email: String,
-  bloodType: String,
+  bloodtype: String,
   lat: Number,
-  lng: Number
+  lng: Number,
+  ip:String
 });

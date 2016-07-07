@@ -9,7 +9,7 @@ var express     = require('express'),
     server      = http.createServer(app),
     io          = require('socket.io').listen(server),
     mongoose    = require('mongoose'),
-    donors      = require('../../server/donors');
+    donorsController = require("../../server/controllers/donors");
 
 //Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/lifegivers');
@@ -22,18 +22,9 @@ app.get('/', function(req, res){
   res.sendFile(path.join(__dirname, 'client', 'views', 'index.html'));
 });
 
-//REST api
-app.use('/api/', donors);
-
-
-describe('#/api/donors', function(){
+describe('Socket API', function(){
 
 	var log = console.log;
-
-	before(function(done){
-		//require(ROOT_DIR + '/server/donors');
-		done();
-	});
 
 	beforeEach(function(){
 
@@ -44,12 +35,9 @@ describe('#/api/donors', function(){
 	});
 
   it('- should GET donors', function(done){
-  	request(app)
-      .get('/api/donors')
-      .end(function(err, res){
+  	donorsController.getInArea({from:[0,0], to:[200,200]}, function(err, data){
       	// Enable the console log to print the assertion output
       	console.log = log;
-      	var data = JSON.parse(res.text);
       	expect(err).to.be.null;
 				expect(data.length).to.not.be.undefined;
       	done();
@@ -61,13 +49,9 @@ describe('#/api/donors', function(){
       name: 'UNIT-TEST-USER'
     };
 
-    request(app)
-      .post('/api/donors')
-      .send(donor)
-      .end(function(err, res){
+    donorsController.create(donor, function(err, data){
         // Enable the console log
         console.log = log;
-        var data = JSON.parse(res.text);
         expect(err).to.be.null;
         expect(data.name).to.equal(donor.name);
         done();
@@ -75,12 +59,11 @@ describe('#/api/donors', function(){
   });
 
   it('- should GET a donor by name', function(done){
-  	request(app)
-      .get('/api/donors/by-name/UNIT-TEST-USER')
-      .end(function(err, res){
+  	donorsController.getDonorByName(
+      'UNIT-TEST-USER',
+      function(err, data){
       	// Enable the console log
       	console.log = log;
-      	var data = JSON.parse(res.text);
       	expect(err).to.be.null;
 				expect(data.name).to.equal('UNIT-TEST-USER');
       	done();
@@ -88,41 +71,36 @@ describe('#/api/donors', function(){
   });
 
   it('- should PUT a donor (update)', function(done){
-    request(app)
-      .get('/api/donors/by-name/UNIT-TEST-USER')
-      .end(function(err, res){
+    donorsController.getDonorByName(
+      'UNIT-TEST-USER',
+      function(err, data){
         // Enable the console log
         console.log = log;
-        var data = JSON.parse(res.text);
         expect(err).to.be.null;
         expect(data.name).to.equal('UNIT-TEST-USER');
-        request(app)
-          .put('/api/donors/'+data._id)
-          .send({name: 'UNIT-TEST-USER-UPDATED'})
-          .end(function(err, res){
-            var data = JSON.parse(res.text);
+        data.name = 'UNIT-TEST-USER-UPDATED';
+        donorsController.update(
+          data,
+          function(err, data2){
             expect(err).to.be.null;
-            expect(data.name).to.equal('UNIT-TEST-USER-UPDATED');
+            expect(data2.name).to.equal('UNIT-TEST-USER-UPDATED');
             done();
           });
       });
   });
 
   it('- should DELETE a donor', function(done){
-    request(app)
-      .get('/api/donors/by-name/UNIT-TEST-USER-UPDATED')
-      .end(function(err, res){
+    donorsController.getDonorByName(
+      'UNIT-TEST-USER-UPDATED',
+      function(err, data){
         // Enable the console log
         console.log = log;
-        var data = JSON.parse(res.text);
         expect(err).to.be.null;
         expect(data.name).to.equal('UNIT-TEST-USER-UPDATED');
-        request(app)
-          .delete('/api/donors/'+data._id)
-          .end(function(err, res){
-            var data = JSON.parse(res.text);
+        donorsController.deleteDonor(
+          data._id,
+          function(err){
             expect(err).to.be.null;
-            expect(data.status).to.equal('OK');
             done();
           });
       });

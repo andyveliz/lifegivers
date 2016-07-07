@@ -1,6 +1,6 @@
 {
-  "name": "LifeGivers",
-  "version": "0.0.1",
+  "name": "LifeGivers-Server",
+  "version": "1.0.0",
   "author": {
     "name": "Andy Veliz",
     "email": "andyveliz@gmail.com"
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "concurrently": "^2.2.0",
     "grunt": "^1.0.1",
     "grunt-mocha-test": "^0.12.7",
     "grunt-run": "^0.6.0",
